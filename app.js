@@ -2,6 +2,21 @@ const express = require('express');
 const app = express();
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+
+app.use(express.static("public"));
+app.use(express.static("models"));
+
+
+/* public files */
+
+const fs = require('fs');
+const navbar = fs.readFileSync("public/navbar.html", "utf8");
+const footer = fs.readFileSync("public/footer.html", "utf8");
+const index = fs.readFileSync("public/index.html", "utf8");
+const signup = fs.readFileSync("public/signup/signup.html", "utf8");
+
+
 
 const session = require('express-session');
 app.use(session({
@@ -9,6 +24,7 @@ app.use(session({
     resave: false,
     saveUninitialized: true
 }));
+
 
 const rateLimit = require("express-rate-limit");
 const limiter = rateLimit({
@@ -29,6 +45,7 @@ const knex = Knex(knexFile.development);
 
 Model.knex(knex);
 
+
 /* Add routes */
 
 const authRoute = require('./routes/auth.js');
@@ -38,11 +55,7 @@ app.use(authRoute);
 app.use(usersRoute);
 
 
-const fs = require('fs');
-const navbar = fs.readFileSync("public/navbar.html", "utf8");
-const footer = fs.readFileSync("public/footer.html", "utf8");
-const index = fs.readFileSync("public/index.html", "utf8");
-const signup = fs.readFileSync("public/signup/signup.html", "utf8");
+
 
 app.get("/", (req, res) => {
     return res.send(navbar + index + footer)

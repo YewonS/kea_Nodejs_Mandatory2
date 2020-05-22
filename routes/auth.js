@@ -1,5 +1,3 @@
-console.log("auth file loaded")
-
 const route = require('express').Router();
 
 const User = require('../models/User.js');
