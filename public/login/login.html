@@ -1,5 +1,14 @@
+<script src="/login/login.js"></script>
+ <!-- css -->
+ <link rel="stylesheet" href="../global.css">
+
+
+
 <div>
-    <form action="/login" method="POST">
+
+    <h2>Log in</h2>
+
+    <form action="/login" method="POST" name="loginform" onsubmit="return validateLogin()">
         <p> 
             <label for="username">Enter Username: </label>
             <input type="text" id="username" name="username" placeholder="Type in your username.">
@@ -9,7 +18,7 @@
             <input type="password" id="password" name="password" placeholder="Type in your password.">
         </p>
 
-        <a class="">Log in</a>
+        <button class="btn btn-primary" type="submit">Log in</button>
 
     </form>
 </div>

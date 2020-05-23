@@ -11,6 +11,7 @@ exports.up = function(knex) {
         .createTable('users', (table) => {
             table.increments('id').notNullable();
             table.string('username').unique().notNullable();
+            table.string('email').notNullable();
             table.string('password').notNullable();
             table.integer('age');
 

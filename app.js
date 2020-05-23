@@ -5,7 +5,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.use(express.static("public"));
-app.use(express.static("models"));
 
 
 /* public files */
@@ -13,14 +12,16 @@ app.use(express.static("models"));
 const fs = require('fs');
 const navbar = fs.readFileSync("public/navbar.html", "utf8");
 const footer = fs.readFileSync("public/footer.html", "utf8");
-const index = fs.readFileSync("public/index.html", "utf8");
+const index = fs.readFileSync("public/main.html", "utf8");
 const signup = fs.readFileSync("public/signup/signup.html", "utf8");
+const login = fs.readFileSync("public/login/login.html", "utf8");
+const loggedIn = fs.readFileSync("public/mainLoggedIn.html", "utf8");
 
 
 
 const session = require('express-session');
 app.use(session({
-    secret: require('./config/mysqlCredentials.js').sessionSecret,
+    secret: require('./config/configSession.json').sessionSecret,
     resave: false,
     saveUninitialized: true
 }));
@@ -56,13 +57,27 @@ app.use(usersRoute);
 
 
 
+let sess;
 
 app.get("/", (req, res) => {
-    return res.send(navbar + index + footer)
+    sess = req.session;
+    console.log("session: ", req.sessionID);
+    console.log("user:", req.session.username)
+    if (req.session.username) {
+        return res.send(navbar + loggedIn + footer);
+    } else {
+        return res.send(navbar + index + footer);
+    }
 });
 
 app.get("/signup", (req, res) => {
-    return res.send(navbar + signup + footer)
+    return res.send(navbar + signup + footer);
+});
+
+app.get("/login", (req, res) => {
+    sess = req.session;
+
+    return res.send(navbar + login + footer);
 });
 
 

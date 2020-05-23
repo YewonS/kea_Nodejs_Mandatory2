@@ -3,34 +3,59 @@ const route = require('express').Router();
 const User = require('../models/User.js');
 const Role = require('../models/Role.js');
 
+const nodemailer = require('nodemailer');
+const emailValidator = require('email-validator');
+const nodemailerCred = require('../config/nodemailercred.js'); // TODO: Don't forget to create this file!
+
 const bcrypt = require('bcrypt');
 const saltRounds = 12;
 
-route.post("/login", (req, res) => {
+route.post("/login", async (req, res) => {
     // 1. retrieve the login details and validate
     // 2. check for a user match in the database
     // 3. bcrypt compare
     // 4. sessions
-    bcrypt.compare("plaintextPassword", "hashedPasswordToCompareWith").then((result) => {
-        console.log(result);
-    });
-    return res.send({ response: "OKOK" });
+    const username = req.body.username;
+    const password = req.body.password;
+
+    const userFound = await User.query().select().where({ 'username': username }).limit(1);
+    if (!userFound) {
+        return res.status(400).send({ response: "User does not exists." });
+    } else {
+        const hash = bcrypt.hashSync(password, saltRounds);
+        bcrypt.compare(password, hash).then(async (result) => {
+            const matchingPassword = await User.query().select('password').where({ 'username': username }).limit(1);
+            const passwordToValidate = matchingPassword[0].password
+            bcrypt.compare(password, passwordToValidate).then((result) => {
+                // when password matches
+                req.session.username = username
+                console.log(req.session.username)
+                return res.send({ response: "OKOK" });
+            })
+
+        }).catch((error) => {
+            console.log("error happended while password authentification, ", error.message);
+            return res.status(400).send({ response: "Password does not match." });
+         });
+    }
+    
 });
 
 route.post("/signup", async (req, res) => {
     
-    console.log("post method sign up")
-    // what fields do we need to sign up?
-    // username, password, repeat password
-    const { username, password, passwordRepeat } = req.body;
+    const { username, email, password, passwordRepeat } = req.body;
     
     const isPasswordTheSame = password === passwordRepeat;
     
-    if (username && password && isPasswordTheSame) {
+    if (username && email && password && isPasswordTheSame) {
+
         // password requirements
         if (password.length < 8) {
             return res.status(400).send({ response: "Password does not fulfill the requirements" });
+        } else if (!emailValidator.validate(email)) {
+            return res.status(400).send({ response: "Email is not valid" });
         } else {
+
             try {
                 
             const userFound = await User.query().select().where({ 'username': username }).limit(1);
@@ -43,9 +68,13 @@ route.post("/signup", async (req, res) => {
                 const hashedPassword = await bcrypt.hash(password, saltRounds);
                 const createdUser = await User.query().insert({
                     username,
+                    email,
                     password: hashedPassword,
                     roleId: defaultUserRoles[0].id
                 });
+
+                // send email to user 
+                sendEmail(email);
 
                 return res.send({ response: `User has been created with the username ${createdUser.username}` });
             }
@@ -63,9 +92,38 @@ route.post("/signup", async (req, res) => {
 });
 
 route.get("/logout", (req, res) => {
-    // todo destroy the session
+    // TODO: destroy the session
     return res.send({ response: "OKOK" });
 });
+
+
+function sendEmail(email) {
+
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: nodemailerCred.email,
+          pass: nodemailerCred.password
+        }
+      });
+      
+      const mailOptions = {
+        from: nodemailerCred.email,
+        to: email,
+        subject: 'Secret Message account registration',
+        text: "Hello. \n Welcome to Secret Message. :) "
+      };
+      
+      transporter.sendMail(mailOptions, function(error, info){
+        if (error) {
+          console.log(error);
+        } else {
+          console.log('Email sent: ' + info.response);
+        }
+      });
+}
+
+
 
 
 module.exports = route;

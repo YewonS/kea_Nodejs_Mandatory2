@@ -1,5 +1,7 @@
 
 mysqlCredentials.js
+nodemailercred.js
+configSession.json
 
 # Logs
 logs
