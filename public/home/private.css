@@ -1,0 +1,57 @@
+body {
+    margin: 70px;
+    color: white; 
+    background-color:#3e464f;
+}
+
+h2 {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.button {
+  margin-left: 10px;
+  margin-right: 10px;
+  color: white;
+}
+
+/* set colors*/
+:root {
+    --color-1: #DBC2CF;
+    --color-2: #9FA2B2;
+    --color-3: #3C7A89;
+    --color-4: #2E4756;
+    --color-5: #16262E;
+  }
+  
+  .foo {
+    min-height: 5vh;
+    margin-bottom: 10px;
+    padding: 10px;
+    color: white;
+    text-transform: uppercase;
+    font-size: 30px;
+    text-align: center;
+  }
+  
+  /* apply colors */
+  .foo-1 {
+    background-color: var(--color-1);
+  }
+  
+  .foo-2 {
+    background-color: var(--color-2);
+  }
+  
+  .foo-3 {
+    background-color: var(--color-3);
+  }
+  
+  .foo-4 {
+    background-color: var(--color-4);  
+  }
+  
+  .foo-5 {
+    background-color: var(--color-5);
+  }
+  

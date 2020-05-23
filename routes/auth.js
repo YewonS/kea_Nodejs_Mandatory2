@@ -23,14 +23,16 @@ route.post("/login", async (req, res) => {
         return res.status(400).send({ response: "User does not exists." });
     } else {
         const hash = bcrypt.hashSync(password, saltRounds);
+        // TODO: Somehow, it still works when you type in the wront password, so fix this.
         bcrypt.compare(password, hash).then(async (result) => {
             const matchingPassword = await User.query().select('password').where({ 'username': username }).limit(1);
-            const passwordToValidate = matchingPassword[0].password
+            const passwordToValidate = matchingPassword[0].password;
             bcrypt.compare(password, passwordToValidate).then((result) => {
                 // when password matches
-                req.session.username = username
-                console.log(req.session.username)
-                return res.send({ response: "OKOK" });
+                req.session.username = username;
+                console.log(req.session.username);
+                // return res.send({ response: "OKOK" });
+                return res.redirect("/home");
             })
 
         }).catch((error) => {
@@ -76,7 +78,9 @@ route.post("/signup", async (req, res) => {
                 // send email to user 
                 sendEmail(email);
 
-                return res.send({ response: `User has been created with the username ${createdUser.username}` });
+                req.session.username = username;
+                // return res.send({ response: `User has been created with the username ${createdUser.username}` });
+                return res.redirect("/login");
             }
 
             } catch (error) {
@@ -92,8 +96,12 @@ route.post("/signup", async (req, res) => {
 });
 
 route.get("/logout", (req, res) => {
-    // TODO: destroy the session
-    return res.send({ response: "OKOK" });
+    // TODO: make logout button
+    req.session.destroy((error)=> {
+        console.log("Error happend when logging out:", error);
+    })
+    // return res.send({ response: "OKOK" });
+    return res.redirect('/');
 });
 
 
@@ -111,7 +119,7 @@ function sendEmail(email) {
         from: nodemailerCred.email,
         to: email,
         subject: 'Secret Message account registration',
-        text: "Hello. \n Welcome to Secret Message. :) "
+        text: "Hello. \nWelcome to Secret Message. \nCongratulations. You are now registered. \nThank you for giving me your information. \nNo worries though, we'll keep them safe. :D "
       };
       
       transporter.sendMail(mailOptions, function(error, info){
