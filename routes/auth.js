@@ -15,30 +15,35 @@ route.post("/login", async (req, res) => {
     // 2. check for a user match in the database
     // 3. bcrypt compare
     // 4. sessions
-    const username = req.body.username;
-    const password = req.body.password;
+    const { username, password } = req.body;
 
-    const userFound = await User.query().select().where({ 'username': username }).limit(1);
-    if (!userFound) {
-        return res.status(400).send({ response: "User does not exists." });
+    if (username && password) {
+        try {
+            User.query().select('username').where({ 'username': username }).then( async userFound => {
+                if (userFound.length == 0) {
+                    return res.redirect("/login?error");
+                } else {
+                    const matchingPassword = await User.query().select('password').where({ 'username': username }).limit(1);
+                    const passwordToValidate = matchingPassword[0].password;
+
+                    bcrypt.compare(password, passwordToValidate).then((result) => {
+                        if (result) {
+                            // if true
+                            req.session.username = username;
+                            return res.redirect("/home");
+                        } else {
+                            return res.redirect("login?error");
+                        }
+                    });
+                }
+
+            });
+        } catch (error) {
+            return res.redirect("/login?error");
+        }
+
     } else {
-        const hash = bcrypt.hashSync(password, saltRounds);
-        // TODO: Somehow, it still works when you type in the wront password, so fix this.
-        bcrypt.compare(password, hash).then(async (result) => {
-            const matchingPassword = await User.query().select('password').where({ 'username': username }).limit(1);
-            const passwordToValidate = matchingPassword[0].password;
-            bcrypt.compare(password, passwordToValidate).then((result) => {
-                // when password matches
-                req.session.username = username;
-                console.log(req.session.username);
-                // return res.send({ response: "OKOK" });
-                return res.redirect("/home");
-            })
-
-        }).catch((error) => {
-            console.log("error happended while password authentification, ", error.message);
-            return res.status(400).send({ response: "Password does not match." });
-         });
+        return res.redirect("/login?error");
     }
     
 });
@@ -96,7 +101,6 @@ route.post("/signup", async (req, res) => {
 });
 
 route.get("/logout", (req, res) => {
-    // TODO: make logout button
     req.session.destroy((error)=> {
         console.log("Error happend when logging out:", error);
     })

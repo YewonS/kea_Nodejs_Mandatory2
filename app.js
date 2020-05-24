@@ -6,6 +6,9 @@ app.use(express.urlencoded({ extended: false }));
 
 app.use(express.static("public"));
 
+app.set('view engine', 'ejs');
+const ejs = require('ejs');
+
 
 /* public files */
 
@@ -81,24 +84,24 @@ app.get("/", (req, res) => {
     console.log("session: ", req.sessionID);
     console.log("user:", req.session.username);
 
-    return res.send(navbar + index + footer);
+    return res.send(ejs.render(navbar, { sessionUser: req.session.username }) + index + footer);
     
 });
 
 app.get("/signup", goToHomePage, (req, res) => {
-    return res.send(navbar + signup + footer);
+    return res.send(ejs.render(navbar, { sessionUser: req.session.username }) + signup + footer);
 });
 
 app.get("/login", goToHomePage, (req, res) => {
     console.log("session: ", req.sessionID);
     console.log("user:", req.session.username);
 
-    return res.send(navbar + login + footer);
+    return res.send(ejs.render(navbar, { sessionUser: req.session.username }) + login + footer);
 });
 
 app.get("/home", goToLoginPage, (req, res) => {
-    return res.send(navbar + home + footer);
-})
+    return res.send(ejs.render(navbar, { sessionUser: req.session.username }) + home + footer);
+});
 
 
 /* Start server */
@@ -110,4 +113,4 @@ app.listen(PORT, (error) => {
         console.log(error);
     }
     console.log("Server is running on port", PORT);
-})
+});

@@ -30,7 +30,11 @@
     <nav class="navbar fixed-top navbar-dark bg-dark">
         <a class="navbar-brand" href="/login">Secret Message</a>
         <form class="form-inline buttons">
-            <a class="button signup" href="/signup">Sign Up</a>
-            <a class="button login" href="/login">Log in</a>
+            <a class="button signup" href="/signup" id="signupButton">Sign Up</a>
+            <a class="button login" href="/login" id="loginButton">Log in</a>
+            <a class="button home" href="/home" id="loggedInUser"><%=sessionUser%></a>
+            <a class="button logout" href="/logout" id="logoutButton">Logout</a>
         </form>
     </nav>
+
+    <script src="/navbar.js"></script>

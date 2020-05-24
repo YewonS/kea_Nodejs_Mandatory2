@@ -1,3 +1,7 @@
+const queryString = window.location.search;
+if(queryString)
+    alert("Username or password is incorrect.");
+
 function validateLogin() {
 
     console.log("validate login...")
